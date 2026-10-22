@@ -1,30 +1,40 @@
+
 workflows:
-  flutter-build:
-    name: Flutter CI/CD (Test, Android & Web)
+  flutter-windows:
+    name: Flutter Windows Desktop Build
     max_build_duration: 60
-    instance_type: linux_x2
+    instance_type: windows_x2
+
     environment:
       flutter: stable
+
     scripts:
       - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Enable Windows desktop
+        script: flutter config --enable-windows-desktop
+
+      - name: Check Windows project
         script: |
-          flutter packages pub get
-      - name: Flutter Analyze
+          if (!(Test-Path "windows/CMakeLists.txt")) {
+            flutter create --platforms=windows .
+          }
+
+      - name: Build Windows Release
+        script: flutter build windows --release
+
+      - name: Package Windows app
         script: |
-          flutter analyze
-      - name: Flutter Test
-        script: |
-          flutter test
-      - name: Build Android Release APK
-        script: |
-          flutter build apk --release
-      - name: Build Flutter Web
-        script: |
-          flutter build web --release
+          Compress-Archive `
+            -Path "build/windows/x64/runner/Release/*" `
+            -DestinationPath "Flutter-Windows.zip" `
+            -Force
+
     artifacts:
-      - build/**/outputs/**/*.apk
-      - build/**/outputs/**/mapping.txt
-      - build/web/**
+      - Flutter-Windows.zip
+      - build/windows/x64/runner/Release/**
+
     publishing:
       email:
         recipients:

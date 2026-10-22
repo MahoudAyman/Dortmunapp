@@ -1,0 +1,34 @@
+workflows:
+  flutter-build:
+    name: Flutter CI/CD (Test, Android & Web)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Flutter Analyze
+        script: |
+          flutter analyze
+      - name: Flutter Test
+        script: |
+          flutter test
+      - name: Build Android Release APK
+        script: |
+          flutter build apk --release
+      - name: Build Flutter Web
+        script: |
+          flutter build web --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/mapping.txt
+      - build/web/**
+    publishing:
+      email:
+        recipients:
+          - gqikdubrjntorldfieo36@gmail.com
+        notify:
+          success: true
+          failure: true
